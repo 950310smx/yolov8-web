@@ -29,8 +29,6 @@ streamlit
 openpyxl
 # Streamlit Cloud 目前默认安装的版本依赖 Altair 4.x API，这里显式安装兼容版本
 altair>=4.2.0,<5
-# Python 3.13 中已移除内置 imghdr，旧版 Streamlit 仍然依赖，显式安装兼容包
-imghdr
 
 # Export --------------------------------------
 # coremltools>=6.0  # CoreML export
