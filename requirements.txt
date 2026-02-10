@@ -27,6 +27,8 @@ seaborn>=0.11.0
 # Streamlit app -------------------------------
 streamlit
 openpyxl
+# Streamlit Cloud 目前默认安装的版本依赖 Altair 4.x API，这里显式安装兼容版本
+altair>=4.2.0,<5
 
 # Export --------------------------------------
 # coremltools>=6.0  # CoreML export
