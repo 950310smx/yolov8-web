@@ -72,7 +72,7 @@ PLOT_OPTIONS_DISPLAY, INTERNAL_TO_DISPLAY_MAP, DISPLAY_TO_INTERNAL_MAP = _get_pl
 # ----------------------------------------------------
 # Streamlit 核心 UI 结构
 # ----------------------------------------------------
-st.title("颗粒形态学分析与YOLOv8实例分割 Web 演示")
+st.title("颗粒形态学分析与YOLOv8实例分割")
 st.markdown("上传图像，使用YOLOv8进行实例分割，并计算颗粒形态学参数。所有参数均可交互式调整。")
 
 

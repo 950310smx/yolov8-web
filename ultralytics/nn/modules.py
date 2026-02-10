@@ -4,6 +4,7 @@ Common modules
 """
 
 import math
+import sys
 
 import torch
 import torch.nn as nn
@@ -35,6 +36,19 @@ class Conv(nn.Module):
 
     def forward_fuse(self, x):
         return self.act(self.conv(x))
+
+
+# --------------------------------------------------------------------------- #
+# Backwards-compatibility shim
+# 一些旧模型权重在保存时使用了类似
+# 'ultralytics.nn.modules.conv.*'、'ultralytics.nn.modules.block.*' 这样的导入路径。
+# 在当前源码结构中，这些层都集中在本文件中，而不是独立的子模块。
+# 下面的别名操作让这些旧权重在加载时依然能正确找到对应的类。
+# --------------------------------------------------------------------------- #
+this_module = sys.modules[__name__]
+sys.modules[__name__ + ".conv"] = this_module
+sys.modules[__name__ + ".block"] = this_module
+sys.modules[__name__ + ".head"] = this_module
 
 
 class DWConv(Conv):

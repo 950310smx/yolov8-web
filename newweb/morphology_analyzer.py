@@ -288,11 +288,12 @@ def setup_matplotlib_config():
         # 同时设置全局字体族和无衬线字体，强制所有文本都走这套中文字体
         plt.rcParams['font.family'] = chosen_font_name
         plt.rcParams['font.sans-serif'] = [chosen_font_name]
-        print(f"✅ Matplotlib 使用中文字体文件: {chosen_font_name}")
+        # 避免控制台编码问题，不再使用 emoji 字符
+        print(f"[INFO] Matplotlib 使用中文字体文件: {chosen_font_name}")
     else:
         # 找不到中文字体文件时，退回原来的候选字体名列表
         plt.rcParams['font.sans-serif'] = ['SimHei', 'Microsoft YaHei', 'Arial Unicode MS', 'sans-serif']
-        print("⚠️ 未找到明确的中文字体文件，退回按字体名匹配。")
+        print("[WARN] 未找到明确的中文字体文件，退回按字体名匹配。")
 
     plt.rcParams['axes.unicode_minus'] = False  # 解决负号显示为方块的问题
 
