@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>个人中心 - 金属材料微观图像智能分析云服务平台</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+        }
+        body {
+            min-height: 100vh;
+            padding: 20px 40px 40px;
+            background: linear-gradient(135deg, rgba(15,23,42,0.8), rgba(15,23,42,0.95)),
+                        url("{{ url_for('static', filename='img/bg-ai.png') }}") center/cover no-repeat fixed;
+            color: #f9fafb;
+        }
+        .top-back {
+            position: fixed;
+            top: 20px;
+            right: 40px;
+            z-index: 20;
+        }
+        .back-link {
+            font-size: 13px;
+            color: #e5e7eb;
+            text-decoration: none;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            padding: 6px 14px;
+            background: rgba(15, 23, 42, 0.7);
+            display: inline-block;
+        }
+        .back-link:hover {
+            border-color: #38bdf8;
+        }
+        .header {
+            margin-bottom: 28px;
+        }
+        .title-en {
+            font-size: 13px;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: #cbd5f5;
+            margin-bottom: 6px;
+        }
+        .title-cn {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .profile-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .profile-card {
+            background: rgba(15, 23, 42, 0.9);
+            border-radius: 18px;
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            padding: 32px;
+            backdrop-filter: blur(18px);
+            margin-bottom: 24px;
+        }
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #f9fafb;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.3);
+            padding-bottom: 12px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            color: #9ca3af;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.5);
+            border-radius: 8px;
+            color: #f9fafb;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #38bdf8;
+        }
+        .form-group input::placeholder {
+            color: #6b7280;
+        }
+        .signature-section {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(148, 163, 184, 0.3);
+        }
+        .signature-preview {
+            margin-top: 16px;
+            padding: 20px;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 8px;
+            border: 1px dashed rgba(148, 163, 184, 0.5);
+            text-align: center;
+        }
+        .signature-preview img {
+            max-width: 200px;
+            max-height: 100px;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+        .signature-preview .no-signature {
+            color: #9ca3af;
+            font-size: 13px;
+        }
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(148, 163, 184, 0.3);
+        }
+        .btn {
+            padding: 10px 24px;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-primary {
+            background: #3b82f6;
+            color: #ffffff;
+        }
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        .btn-secondary {
+            background: rgba(148, 163, 184, 0.2);
+            color: #e5e7eb;
+            border: 1px solid rgba(148, 163, 184, 0.5);
+        }
+        .btn-secondary:hover {
+            background: rgba(148, 163, 184, 0.3);
+        }
+        .flash {
+            margin-bottom: 20px;
+        }
+        .flash-success {
+            padding: 12px 16px;
+            background: rgba(74, 222, 128, 0.2);
+            border: 1px solid rgba(74, 222, 128, 0.5);
+            border-radius: 8px;
+            color: #4ade80;
+            font-size: 14px;
+        }
+        .flash-error {
+            padding: 12px 16px;
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            border-radius: 8px;
+            color: #ef4444;
+            font-size: 14px;
+        }
+        .info-hint {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-top: 6px;
+        }
+    </style>
+</head>
+<body>
+<div class="top-back">
+    <a href="{{ url_for('main') }}" class="back-link">返回主界面</a>
+</div>
+
+<div class="header">
+    <div class="title-en">USER PROFILE · PERSONAL INFORMATION</div>
+    <div class="title-cn">个人中心</div>
+</div>
+
+<div class="profile-container">
+    <div class="flash">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+        <div class="profile-card">
+            <div class="card-title">基本信息</div>
+            
+            <div class="form-group">
+                <label for="username">用户名</label>
+                <input type="text" id="username" value="{{ user.username }}" disabled>
+                <div class="info-hint">用户名不可修改</div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">邮箱</label>
+                <input type="email" id="email" value="{{ user.email }}" disabled>
+                <div class="info-hint">邮箱不可修改</div>
+            </div>
+
+            <div class="form-group">
+                <label for="real_name">真实姓名 <span style="color: #ef4444;">*</span></label>
+                <input type="text" id="real_name" name="real_name" 
+                       value="{{ user.real_name or '' }}" 
+                       placeholder="请输入真实姓名">
+            </div>
+
+            <div class="form-group">
+                <label for="position">职位/职称</label>
+                <select id="position" name="position">
+                    <option value="">请选择职位</option>
+                    <option value="质量工程师" {% if user.position == '质量工程师' %}selected{% endif %}>质量工程师</option>
+                    <option value="检测员" {% if user.position == '检测员' %}selected{% endif %}>检测员</option>
+                    <option value="审核员" {% if user.position == '审核员' %}selected{% endif %}>审核员</option>
+                    <option value="技术主管" {% if user.position == '技术主管' %}selected{% endif %}>技术主管</option>
+                    <option value="实验室主任" {% if user.position == '实验室主任' %}selected{% endif %}>实验室主任</option>
+                    <option value="其他" {% if user.position and user.position not in ['质量工程师', '检测员', '审核员', '技术主管', '实验室主任'] %}selected{% endif %}>其他</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">联系电话</label>
+                <input type="tel" id="phone" name="phone" 
+                       value="{{ user.phone or '' }}" 
+                       placeholder="请输入联系电话">
+            </div>
+
+            <div class="form-group">
+                <label>用户角色</label>
+                <input type="text" value="{% if user.role == 'user' %}普通用户{% elif user.role == 'member' %}会员{% elif user.role == 'admin' %}管理员{% elif user.role == 'analyst' %}分析师{% else %}{{ user.role }}{% endif %}" disabled>
+                <div class="info-hint">用户角色由系统管理</div>
+            </div>
+
+            <div class="form-group">
+                <label>会员状态</label>
+                <input type="text" value="{% if user.membership_status == 'pending' %}待审核{% elif user.membership_status == 'approved' %}已通过{% elif user.membership_status == 'rejected' %}已拒绝{% else %}无申请{% endif %}" disabled>
+                <div class="info-hint">会员申请状态</div>
+            </div>
+
+            {% if user.role == 'user' and user.membership_status != 'pending' and user.membership_status != 'approved' %}
+            <div class="form-group" style="margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(148, 163, 184, 0.3);">
+                <label>会员申请</label>
+                <div style="margin-top: 12px;">
+                    <button type="button" id="applyMembershipBtn" class="btn btn-primary">申请成为会员</button>
+                    <div class="info-hint" style="margin-top: 8px;">点击按钮申请成为会员，申请提交后等待管理员审核</div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="signature-section">
+                <div class="card-title" style="margin-bottom: 16px; border: none; padding: 0;">电子签名</div>
+                <div class="form-group">
+                    <label>请在下方画布中签名</label>
+                    <div style="margin-top: 12px;">
+                        <canvas id="signatureCanvas" width="400" height="150" 
+                                style="border: 2px solid rgba(148, 163, 184, 0.5); border-radius: 8px; 
+                                       background: #ffffff; cursor: crosshair; touch-action: none;"></canvas>
+                    </div>
+                    <div style="margin-top: 12px;">
+                        <button type="button" id="clearSignature" class="btn btn-secondary" style="padding: 6px 16px; font-size: 13px;">清除重签</button>
+                    </div>
+                    <div class="info-hint">使用鼠标或触摸屏在画布上签名</div>
+                    <input type="hidden" id="signatureData" name="signature_data">
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">保存修改</button>
+                <a href="{{ url_for('main') }}" class="btn btn-secondary">取消</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    const canvas = document.getElementById('signatureCanvas');
+    const ctx = canvas.getContext('2d');
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
+    
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    
+    {% if signature_url %}
+    const existingSignature = new Image();
+    existingSignature.crossOrigin = 'anonymous';
+    existingSignature.onload = function() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(existingSignature, 0, 0, canvas.width, canvas.height);
+        updateSignatureData();
+    };
+    existingSignature.src = '{{ signature_url }}';
+    {% endif %}
+    
+    function startDrawing(e) {
+        isDrawing = true;
+        const rect = canvas.getBoundingClientRect();
+        lastX = (e.clientX || e.touches[0].clientX) - rect.left;
+        lastY = (e.clientY || e.touches[0].clientY) - rect.top;
+    }
+    
+    function draw(e) {
+        if (!isDrawing) return;
+        
+        const rect = canvas.getBoundingClientRect();
+        const currentX = (e.clientX || e.touches[0].clientX) - rect.left;
+        const currentY = (e.clientY || e.touches[0].clientY) - rect.top;
+        
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(currentX, currentY);
+        ctx.stroke();
+        
+        lastX = currentX;
+        lastY = currentY;
+        updateSignatureData();
+    }
+    
+    function stopDrawing() {
+        if (isDrawing) {
+            isDrawing = false;
+            updateSignatureData();
+        }
+    }
+    
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseout', stopDrawing);
+    
+    canvas.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        startDrawing(e);
+    });
+    canvas.addEventListener('touchmove', function(e) {
+        e.preventDefault();
+        draw(e);
+    });
+    canvas.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        stopDrawing();
+    });
+    
+    document.getElementById('clearSignature').addEventListener('click', function() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        updateSignatureData();
+        
+        fetch('{{ url_for("clear_signature") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        }).then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('签名文件已删除');
+            }
+        }).catch(error => {
+            console.error('删除签名文件时出错:', error);
+        });
+    });
+    
+    function updateSignatureData() {
+        const dataURL = canvas.toDataURL('image/png');
+        document.getElementById('signatureData').value = dataURL;
+    }
+    
+    document.querySelector('form').addEventListener('submit', function() {
+        updateSignatureData();
+    });
+    
+    {% if user.role == 'user' and user.membership_status != 'pending' and user.membership_status != 'approved' %}
+    document.getElementById('applyMembershipBtn').addEventListener('click', function() {
+        if (!confirm('确定要申请成为会员吗？')) {
+            return;
+        }
+        
+        fetch('{{ url_for("apply_membership") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert('申请失败：' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('申请失败，请重试');
+        });
+    });
+    {% endif %}
+</script>
+</body>
+</html>
+

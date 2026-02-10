@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>管理员界面 - 金属材料微观图像智能分析云服务平台</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+        }
+        body {
+            min-height: 100vh;
+            padding: 20px 40px 40px;
+            background: linear-gradient(135deg, rgba(15,23,42,0.8), rgba(15,23,42,0.95)),
+                        url("{{ url_for('static', filename='img/bg-ai.png') }}") center/cover no-repeat fixed;
+            color: #f9fafb;
+        }
+        .navbar {
+            width: 100%;
+            padding: 10px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(15, 23, 42, 0.82);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.5);
+            backdrop-filter: blur(14px);
+            margin-bottom: 24px;
+        }
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo-badge {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: radial-gradient(circle at 30% 20%, #e5f2ff, #38bdf8 40%, #0f172a 80%);
+            box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.5), 0 10px 25px rgba(15, 23, 42, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: #0f172a;
+        }
+        .nav-title-main {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 13px;
+        }
+        .nav-link {
+            color: #e5e7eb;
+            text-decoration: none;
+            padding: 6px 2px;
+            border-bottom: 2px solid transparent;
+            transition: border-color 0.15s ease, color 0.15s ease;
+        }
+        .nav-link:hover {
+            color: #ffffff;
+            border-bottom-color: #38bdf8;
+        }
+        .nav-link-cta {
+            padding: 6px 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            background: rgba(15, 23, 42, 0.9);
+        }
+        .nav-link-cta:hover {
+            border-color: #38bdf8;
+            background: rgba(15, 23, 42, 1);
+        }
+        .header {
+            margin-bottom: 28px;
+        }
+        .title-en {
+            font-size: 13px;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: #cbd5f5;
+            margin-bottom: 6px;
+        }
+        .title-cn {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .admin-card {
+            background: rgba(15, 23, 42, 0.9);
+            border-radius: 18px;
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            padding: 32px;
+            backdrop-filter: blur(18px);
+            margin-bottom: 24px;
+        }
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #f9fafb;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.3);
+            padding-bottom: 12px;
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.3);
+        }
+        th {
+            background: rgba(30, 41, 59, 0.8);
+            color: #cbd5f5;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        td {
+            color: #e5e7eb;
+            font-size: 14px;
+        }
+        tr:hover {
+            background: rgba(30, 41, 59, 0.5);
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        .badge-user {
+            background: rgba(148, 163, 184, 0.3);
+            color: #cbd5e1;
+        }
+        .badge-member {
+            background: rgba(59, 130, 246, 0.3);
+            color: #60a5fa;
+        }
+        .badge-admin {
+            background: rgba(239, 68, 68, 0.3);
+            color: #f87171;
+        }
+        .badge-analyst {
+            background: rgba(139, 92, 246, 0.3);
+            color: #a78bfa;
+        }
+        .badge-pending {
+            background: rgba(251, 191, 36, 0.3);
+            color: #fbbf24;
+        }
+        .badge-approved {
+            background: rgba(34, 197, 94, 0.3);
+            color: #4ade80;
+        }
+        .badge-rejected {
+            background: rgba(239, 68, 68, 0.3);
+            color: #f87171;
+        }
+        .badge-none {
+            background: rgba(107, 114, 128, 0.3);
+            color: #9ca3af;
+        }
+        .btn {
+            padding: 6px 16px;
+            border-radius: 6px;
+            border: none;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-approve {
+            background: #10b981;
+            color: #ffffff;
+        }
+        .btn-approve:hover {
+            background: #059669;
+        }
+        .btn-reject {
+            background: #ef4444;
+            color: #ffffff;
+        }
+        .btn-reject:hover {
+            background: #dc2626;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+        .flash {
+            margin-bottom: 20px;
+        }
+        .flash-success {
+            padding: 12px 16px;
+            background: rgba(74, 222, 128, 0.2);
+            border: 1px solid rgba(74, 222, 128, 0.5);
+            border-radius: 8px;
+            color: #4ade80;
+            font-size: 14px;
+        }
+        .flash-error {
+            padding: 12px 16px;
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            border-radius: 8px;
+            color: #ef4444;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<div class="navbar">
+    <div class="nav-left">
+        <div class="logo-badge">AI</div>
+        <div>
+            <div class="nav-title-main">管理员界面</div>
+        </div>
+    </div>
+    <div class="nav-right">
+        <a href="{{ url_for('main') }}" class="nav-link">返回主界面</a>
+        <a href="{{ url_for('logout') }}" class="nav-link nav-link-cta">退出登录</a>
+    </div>
+</div>
+
+<div class="header">
+    <div class="title-en">ADMIN DASHBOARD · USER MANAGEMENT</div>
+    <div class="title-cn">管理员控制台</div>
+</div>
+
+<div class="admin-container">
+    <div class="flash">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <div class="admin-card">
+        <div class="card-title">待审核的会员申请</div>
+        {% if pending_applications %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>用户名</th>
+                        <th>邮箱</th>
+                        <th>真实姓名</th>
+                        <th>职位</th>
+                        <th>联系电话</th>
+                        <th>申请时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in pending_applications %}
+                    <tr>
+                        <td>{{ app.username }}</td>
+                        <td>{{ app.email }}</td>
+                        <td>{{ app.real_name or '-' }}</td>
+                        <td>{{ app.position or '-' }}</td>
+                        <td>{{ app.phone or '-' }}</td>
+                        <td>{{ app.created_at }}</td>
+                        <td>
+                            <button class="btn btn-approve" onclick="approveMembership({{ app.id }})">通过</button>
+                            <button class="btn btn-reject" onclick="rejectMembership({{ app.id }})" style="margin-left: 8px;">拒绝</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">暂无待审核的会员申请</div>
+        {% endif %}
+    </div>
+
+    <div class="admin-card">
+        <div class="card-title">所有账号信息</div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>用户名</th>
+                        <th>邮箱</th>
+                        <th>角色</th>
+                        <th>会员状态</th>
+                        <th>真实姓名</th>
+                        <th>职位</th>
+                        <th>联系电话</th>
+                        <th>注册时间</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            {% if user.role == 'user' %}
+                                <span class="badge badge-user">普通用户</span>
+                            {% elif user.role == 'member' %}
+                                <span class="badge badge-member">会员</span>
+                            {% elif user.role == 'admin' %}
+                                <span class="badge badge-admin">管理员</span>
+                            {% elif user.role == 'analyst' %}
+                                <span class="badge badge-analyst">分析师</span>
+                            {% else %}
+                                <span class="badge badge-user">{{ user.role }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user.membership_status == 'pending' %}
+                                <span class="badge badge-pending">待审核</span>
+                            {% elif user.membership_status == 'approved' %}
+                                <span class="badge badge-approved">已通过</span>
+                            {% elif user.membership_status == 'rejected' %}
+                                <span class="badge badge-rejected">已拒绝</span>
+                            {% else %}
+                                <span class="badge badge-none">无申请</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ user.real_name or '-' }}</td>
+                        <td>{{ user.position or '-' }}</td>
+                        <td>{{ user.phone or '-' }}</td>
+                        <td>{{ user.created_at }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function approveMembership(userId) {
+        if (!confirm('确定要通过该用户的会员申请吗？')) {
+            return;
+        }
+        
+        fetch(`/admin/approve-membership/${userId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert('操作失败：' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('操作失败，请重试');
+        });
+    }
+    
+    function rejectMembership(userId) {
+        if (!confirm('确定要拒绝该用户的会员申请吗？')) {
+            return;
+        }
+        
+        fetch(`/admin/reject-membership/${userId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert('操作失败：' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('操作失败，请重试');
+        });
+    }
+</script>
+</body>
+</html>
+

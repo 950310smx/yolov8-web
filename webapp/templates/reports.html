@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>历史分析记录 - 金属材料微观图像智能分析云服务平台</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+        }
+        body {
+            min-height: 100vh;
+            padding: 20px 40px 40px;
+            background: linear-gradient(135deg, rgba(15,23,42,0.8), rgba(15,23,42,0.95)),
+                        url("{{ url_for('static', filename='img/bg-ai.png') }}") center/cover no-repeat fixed;
+            color: #f9fafb;
+        }
+        .top-back {
+            position: fixed;
+            top: 20px;
+            right: 40px;
+            z-index: 20;
+        }
+        .back-link {
+            font-size: 13px;
+            color: #e5e7eb;
+            text-decoration: none;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            padding: 6px 14px;
+            background: rgba(15, 23, 42, 0.7);
+        }
+        .back-link:hover {
+            border-color: #38bdf8;
+        }
+        .header {
+            margin-bottom: 28px;
+        }
+        .title-en {
+            font-size: 13px;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: #cbd5f5;
+            margin-bottom: 6px;
+        }
+        .title-cn {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .filter-tabs {
+            display: inline-flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .filter-btn {
+            padding: 8px 20px;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            background: rgba(15, 23, 42, 0.6);
+            color: #e5e7eb;
+            font-size: 13px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        .filter-btn:hover {
+            border-color: #38bdf8;
+            color: #f0f9ff;
+        }
+        .filter-btn.active {
+            background: rgba(59, 130, 246, 0.85);
+            border-color: rgba(59, 130, 246, 1);
+            color: #ffffff;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.35);
+        }
+        .reports-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            margin-top: 24px;
+        }
+        .report-card {
+            background: rgba(15, 23, 42, 0.9);
+            border-radius: 18px;
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            padding: 20px;
+            backdrop-filter: blur(18px);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+            position: relative;
+        }
+        .report-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(15, 23, 42, 0.95);
+        }
+        .delete-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(239, 68, 68, 0.8);
+            color: #ffffff;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+        .delete-btn:hover {
+            background: rgba(239, 68, 68, 1);
+            transform: scale(1.1);
+        }
+        .report-thumb {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.5);
+        }
+        .report-info {
+            font-size: 13px;
+            color: #d1d5db;
+        }
+        .report-filename {
+            font-weight: 600;
+            color: #f9fafb;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .report-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #9ca3af;
+        }
+        .report-status {
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 11px;
+            background: rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+        }
+        .analysis-type-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 600;
+            background: rgba(139, 92, 246, 0.9);
+            color: #ffffff;
+            z-index: 10;
+        }
+        .analysis-type-badge.normal {
+            background: rgba(59, 130, 246, 0.9);
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #9ca3af;
+        }
+        .empty-state-title {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="top-back">
+    <a href="{{ url_for('main') }}" class="back-link">返回主界面</a>
+</div>
+
+<div class="header">
+    <div class="title-en">HISTORY REPORTS · ANALYSIS RECORDS</div>
+    <div class="title-cn">历史分析记录</div>
+    <div class="filter-tabs">
+        {% set filters = ['全部', '粉末', '金属'] %}
+        {% for label in filters %}
+        <a class="filter-btn {% if current_filter == label %}active{% endif %}"
+           href="{{ url_for('reports', filter=label) }}">
+            {{ label }}
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+{% if reports %}
+<div class="reports-container">
+    {% for report in reports %}
+    <div class="report-card" onclick="if (!event.target.closest('.delete-btn')) { window.location.href='{{ url_for('report_detail', report_id=report.id) }}'; }">
+        <form method="post" action="{{ url_for('delete_report', report_id=report.id) }}" style="display: inline;" onsubmit="return confirm('确定要删除这条分析记录吗？');">
+            <button type="submit" class="delete-btn" title="删除">×</button>
+        </form>
+        {% if report.analysis_type == 'custom' %}
+        <div class="analysis-type-badge">定制化分析</div>
+        {% else %}
+        <div class="analysis-type-badge normal">普通分析</div>
+        {% endif %}
+        {% if report.result_image_url %}
+        <img src="{{ report.result_image_url }}" alt="检测结果" class="report-thumb">
+        {% else %}
+        <div class="report-thumb" style="background: rgba(148, 163, 184, 0.2); display: flex; align-items: center; justify-content: center; color: #9ca3af;">
+            暂无结果图
+        </div>
+        {% endif %}
+        <div class="report-info">
+            <div class="report-filename">{{ report.original_filename }}</div>
+                <div>材料类型：{{ report.material_type_display }}</div>
+            <div class="report-meta">
+                <span>{{ report.created_at[:16] }}</span>
+                <span class="report-status">已完成</span>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-state-title">暂无历史分析记录</div>
+    <div>请先上传图像进行分析</div>
+</div>
+{% endif %}
+</body>
+</html>
+

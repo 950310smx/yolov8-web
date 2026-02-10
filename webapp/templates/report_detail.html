@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>报告详情 - 金属材料微观图像智能分析云服务平台</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+        }
+        body {
+            height: 100vh;
+            overflow: hidden;
+            padding: 20px 40px;
+            background: linear-gradient(135deg, rgba(15,23,42,0.8), rgba(15,23,42,0.95)),
+                        url("{{ url_for('static', filename='img/bg-ai.png') }}") center/cover no-repeat fixed;
+            color: #f9fafb;
+            display: flex;
+            flex-direction: column;
+        }
+        .top-back {
+            position: fixed;
+            top: 20px;
+            right: 40px;
+            z-index: 20;
+        }
+        .back-link {
+            font-size: 13px;
+            color: #e5e7eb;
+            text-decoration: none;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            padding: 6px 14px;
+            background: rgba(15, 23, 42, 0.7);
+        }
+        .back-link:hover {
+            border-color: #38bdf8;
+        }
+        .header {
+            margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+        .title-en {
+            font-size: 13px;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: #cbd5f5;
+            margin-bottom: 6px;
+        }
+        .title-cn {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .detail-container {
+            display: grid;
+            grid-template-columns: 1.3fr 1fr;
+            gap: 26px;
+            flex: 1;
+            min-height: 0;
+            overflow: visible;
+            align-items: stretch;
+        }
+        .detail-card {
+            background: rgba(15, 23, 42, 0.9);
+            border-radius: 18px;
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            padding: 24px;
+            backdrop-filter: blur(18px);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .detail-section {
+            margin-bottom: 20px;
+        }
+        .detail-section:last-child {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        .detail-label {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-bottom: 6px;
+        }
+        .detail-value {
+            font-size: 14px;
+            color: #f9fafb;
+            font-weight: 500;
+        }
+        .result-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.5);
+        }
+        .result-placeholder {
+            width: 100%;
+            height: 100%;
+            background: rgba(148, 163, 184, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9ca3af;
+        }
+        #particleChart {
+            max-height: 100%;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="top-back">
+    <a href="{{ url_for('reports') }}" class="back-link">返回列表</a>
+    {% if report.analysis_type == 'custom' and custom_metrics %}
+    <a href="{{ url_for('report_visualization', report_id=report.id) }}" class="back-link" style="margin-left: 10px; background: rgba(139, 92, 246, 0.8); border-color: rgba(139, 92, 246, 1);">
+        可视化分析
+    </a>
+    {% endif %}
+    <a href="{{ url_for('export_report_pdf', report_id=report.id) }}" class="back-link" style="margin-left: 10px; background: rgba(59, 130, 246, 0.8); border-color: rgba(59, 130, 246, 1);">
+        生成PDF报告
+    </a>
+</div>
+
+<div class="header">
+    <div class="title-en">REPORT DETAIL · ANALYSIS RESULT</div>
+    <div class="title-cn">分析报告详情</div>
+</div>
+
+<div class="detail-container">
+    <div class="detail-card">
+        <div class="detail-section">
+            <div class="detail-label">原始文件名</div>
+            <div class="detail-value">{{ report.original_filename }}</div>
+        </div>
+        <div class="detail-section">
+            <div class="detail-label">材料类型</div>
+            <div class="detail-value">{{ report.material_type or '未指定' }}</div>
+        </div>
+        <div class="detail-section">
+            <div class="detail-label">任务状态</div>
+            <div class="detail-value">
+                <span style="color: #4ade80;">已完成</span>
+            </div>
+        </div>
+        <div class="detail-section">
+            <div class="detail-label">创建时间</div>
+            <div class="detail-value">{{ report.created_at }}</div>
+        </div>
+        {% if report.analysis_type == 'custom' and custom_metrics %}
+        <div class="detail-section">
+            <div class="detail-label">定制化分析参数</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
+                {% if custom_metrics.aspect_ratio_mean %}
+                <div>
+                    <div class="detail-label" style="font-size: 11px;">长轴短轴比（均值）</div>
+                    <div class="detail-value">{{ "%.3f"|format(custom_metrics.aspect_ratio_mean) }}</div>
+                </div>
+                {% endif %}
+                {% if custom_metrics.roundness_mean %}
+                <div>
+                    <div class="detail-label" style="font-size: 11px;">莱利圆度（均值）</div>
+                    <div class="detail-value">{{ "%.3f"|format(custom_metrics.roundness_mean) }}</div>
+                </div>
+                {% endif %}
+                {% if custom_metrics.radial_std_mean %}
+                <div>
+                    <div class="detail-label" style="font-size: 11px;">边界径向标准差（均值）</div>
+                    <div class="detail-value">{{ "%.3f"|format(custom_metrics.radial_std_mean) }}</div>
+                </div>
+                {% endif %}
+                {% if custom_metrics.coverage_rate %}
+                <div>
+                    <div class="detail-label" style="font-size: 11px;">粉末遮盖率</div>
+                    <div class="detail-value">{{ "%.2f"|format(custom_metrics.coverage_rate * 100) }}%</div>
+                </div>
+                {% endif %}
+                {% if custom_metrics.glcm_contrast_mean %}
+                <div>
+                    <div class="detail-label" style="font-size: 11px;">GLCM对比度（均值）</div>
+                    <div class="detail-value">{{ "%.3f"|format(custom_metrics.glcm_contrast_mean) }}</div>
+                </div>
+                {% endif %}
+                {% if custom_metrics.glcm_energy_mean %}
+                <div>
+                    <div class="detail-label" style="font-size: 11px;">GLCM能量（均值）</div>
+                    <div class="detail-value">{{ "%.3f"|format(custom_metrics.glcm_energy_mean) }}</div>
+                </div>
+                {% endif %}
+                {% if custom_metrics.glcm_homogeneity_mean %}
+                <div>
+                    <div class="detail-label" style="font-size: 11px;">GLCM同质性（均值）</div>
+                    <div class="detail-value">{{ "%.3f"|format(custom_metrics.glcm_homogeneity_mean) }}</div>
+                </div>
+                {% endif %}
+                {% if custom_metrics.lbp_entropy_mean %}
+                <div>
+                    <div class="detail-label" style="font-size: 11px;">LBP熵（均值）</div>
+                    <div class="detail-value">{{ "%.3f"|format(custom_metrics.lbp_entropy_mean) }}</div>
+                </div>
+                {% endif %}
+                {% if custom_metrics.edge_touching_count is defined %}
+                <div>
+                    <div class="detail-label" style="font-size: 11px;">触碰边缘颗粒数</div>
+                    <div class="detail-value">{{ custom_metrics.edge_touching_count }}</div>
+                </div>
+                {% endif %}
+                {% if custom_metrics.shape_distribution %}
+                <div>
+                    <div class="detail-label" style="font-size: 11px;">形状分布</div>
+                    <div class="detail-value">
+                        Round: {{ custom_metrics.shape_distribution.round }}, 
+                        Irregular: {{ custom_metrics.shape_distribution.irregular }}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% endif %}
+        
+        {% if particle_data %}
+        <div class="detail-section" style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
+            <div class="detail-label">粒径分布直方图</div>
+            <div style="flex: 1; min-height: 0; position: relative;">
+                <canvas id="particleChart"></canvas>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="detail-card">
+        <div class="detail-section">
+            <div class="detail-label">检测结果图</div>
+            {% if result_image_url %}
+            <img src="{{ result_image_url }}" alt="检测结果" class="result-image">
+            {% else %}
+            <div class="result-placeholder">暂无结果图</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+{% if particle_data %}
+<script>
+    const particleData = JSON.parse('{{ particle_data | tojson | safe }}');
+    const ctx = document.getElementById('particleChart').getContext('2d');
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: particleData.bins,
+            datasets: [{
+                label: '数量',
+                data: particleData.counts,
+                backgroundColor: 'rgba(56, 189, 248, 0.6)',
+                borderColor: 'rgba(56, 189, 248, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: {
+                        color: '#f9fafb'
+                    }
+                },
+                title: {
+                    display: true,
+                    text: `总检测数量: ${particleData.total}`,
+                    color: '#f9fafb',
+                    font: {
+                        size: 14
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: '粒径大小（像素）',
+                        color: '#9ca3af'
+                    },
+                    ticks: {
+                        color: '#9ca3af',
+                        maxRotation: 45,
+                        minRotation: 45
+                    },
+                    grid: {
+                        color: 'rgba(148, 163, 184, 0.2)'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: '数量',
+                        color: '#9ca3af'
+                    },
+                    ticks: {
+                        color: '#9ca3af',
+                        stepSize: 1,
+                        beginAtZero: true
+                    },
+                    grid: {
+                        color: 'rgba(148, 163, 184, 0.2)'
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endif %}
+
+</body>
+</html>
+

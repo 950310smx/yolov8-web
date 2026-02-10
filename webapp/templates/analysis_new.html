@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>新建分析 - 金属材料微观图像智能分析云服务平台</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px 40px 56px;
+            background: linear-gradient(135deg, rgba(15,23,42,0.8), rgba(15,23,42,0.95)),
+                        url("{{ url_for('static', filename='img/bg-ai.png') }}") center/cover no-repeat fixed;
+            color: #f9fafb;
+        }
+        .layout {
+            width: 100%;
+            max-width: 1400px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        .form-left form {
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+            min-height: 360px;
+        }
+        .left-panel {
+            flex: 1.4;
+        }
+        .right-panel {
+            flex: 1.6;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+        }
+        .card-box {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.9);
+            border-radius: 24px;
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            box-shadow: 0 30px 70px rgba(15, 23, 42, 0.95);
+            padding: 26px 34px 26px;
+            backdrop-filter: blur(18px);
+        }
+        .card-box-right {
+            width: 100%;
+            max-width: 100%;
+            background: rgba(15, 23, 42, 0.9);
+            border-radius: 24px;
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            box-shadow: 0 30px 70px rgba(15, 23, 42, 0.95);
+            padding: 20px 28px 20px;
+            backdrop-filter: blur(18px);
+            margin-left: auto;
+        }
+        .card-right-inner {
+            height: 520px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+        }
+        .title-cn {
+            font-size: 28px;
+            font-weight: 700;
+            margin-top: 6px;
+        }
+        .title-en {
+            font-size: 13px;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: #cbd5f5;
+        }
+        .top-back {
+            position: fixed;
+            top: 20px;
+            right: 40px;
+            z-index: 20;
+        }
+        .back-link {
+            font-size: 13px;
+            color: #e5e7eb;
+            text-decoration: none;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            padding: 6px 14px;
+            background: rgba(15, 23, 42, 0.7);
+        }
+        .back-link:hover {
+            border-color: #38bdf8;
+        }
+        .section-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 14px;
+        }
+        label {
+            display: block;
+            font-size: 13px;
+            margin-bottom: 6px;
+            color: #e5e7eb;
+        }
+        input[type="text"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 9px 11px;
+            border-radius: 10px;
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            background: rgba(15, 23, 42, 0.8);
+            color: #f9fafb;
+            font-size: 13px;
+            outline: none;
+        }
+        input[type="file"] {
+            width: 100%;
+            font-size: 13px;
+            color: #e5e7eb;
+        }
+        textarea {
+            min-height: 70px;
+            resize: vertical;
+        }
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #38bdf8;
+        }
+        .hint {
+            font-size: 11px;
+            color: #9ca3af;
+        }
+        .result-preview {
+            width: 100%;
+            height: 100%;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .result-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 0;
+            border: none;
+            box-shadow: none;
+        }
+        /* Transition GIF container — keep it prominent but limited */
+        .transition-card {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 0;
+        }
+        .transition-preview {
+            width: 100%;
+            max-width: 640px; /* 控制最大展示宽度 */
+            max-height: 420px; /* 控制最大高度，防止卡片撑开 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border-radius: 12px;
+        }
+        .transition-preview img {
+            max-width: 94%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .actions {
+            display: flex;
+            justify-content: flex-start;
+            gap: 24px;
+            margin-top: auto;
+        }
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px 56px;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            background: rgba(15, 23, 42, 0.8);
+            color: #e5e7eb;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .btn-primary {
+            padding: 22px 80px;
+            border-radius: 999px;
+            border: none;
+            background: #e5f2ff;
+            color: #0f172a;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-primary:hover {
+            filter: brightness(1.04);
+        }
+        .flash {
+            margin-top: 12px;
+            font-size: 12px;
+        }
+        .flash-success {
+            color: #4ade80;
+        }
+        .flash-error {
+            color: #fecaca;
+        }
+    </style>
+</head>
+<body>
+<div class="top-back">
+    <a href="{{ url_for('main') }}" class="back-link">返回主界面</a>
+</div>
+
+<div class="layout">
+    <div class="left-panel">
+        <div class="card-box">
+            <div class="header">
+                <div>
+                    <div class="title-en">NEW ANALYSIS · MICROSTRUCTURE IMAGE UPLOAD</div>
+                    <div class="title-cn">新建分析任务 / 上传金属材料微观图像</div>
+                    <div class="section-title" style="margin-top: 22px;">选择待分析的微观图像</div>
+                </div>
+            </div>
+
+            <div class="form-left">
+                <form method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="image">选择图像文件（PNG/JPG/TIF/BMP）：</label>
+                        <input id="image" name="image" type="file" accept=".png,.jpg,.jpeg,.tif,.tiff,.bmp">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="material_type">材料类型：</label>
+                        <select id="material_type" name="material_type">
+                            <option value="">请选择材料类型</option>
+                            <option value="粉末">粉末</option>
+                            <option value="金属">金属</option>
+                        </select>
+                    </div>
+
+                    <div class="actions">
+                        <a href="{{ url_for('main') }}" class="btn-secondary">
+                            取消
+                        </a>
+                        <button type="submit" class="btn-primary">提交并创建分析任务</button>
+                    </div>
+                </form>
+
+                <div class="flash">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="flash-{{ category }}">{{ message }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <div class="card-box-right">
+            <div class="card-right-inner">
+                {% if transition_image_url %}
+                <div style="text-align:center;">
+                    <div class="section-title" style="color:#cbd5f5;margin-bottom:6px;">短动画过渡（原图 → 标注图）</div>
+                    <div class="transition-card">
+                        <div class="transition-preview">
+                            <img src="{{ transition_image_url }}" alt="渐变过渡预览">
+                        </div>
+                    </div>
+                </div>
+                {% elif result_image_url %}
+                <div class="result-preview">
+                    <img src="{{ result_image_url }}" alt="粉末检测结果预览">
+                </div>
+                {% else %}
+                <div class="hint">
+                    请在左侧上传待分析的显微图像，系统完成粉末检测后将在此处展示结果图。
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+
+

@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>可视化分析 - 金属材料微观图像智能分析云服务平台</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+        }
+        body {
+            min-height: 100vh;
+            padding: 20px 40px 40px;
+            background: linear-gradient(135deg, rgba(15,23,42,0.8), rgba(15,23,42,0.95)),
+                        url("{{ url_for('static', filename='img/bg-ai.png') }}") center/cover no-repeat fixed;
+            color: #f9fafb;
+        }
+        .top-back {
+            position: fixed;
+            top: 20px;
+            right: 40px;
+            z-index: 20;
+        }
+        .back-link {
+            font-size: 13px;
+            color: #e5e7eb;
+            text-decoration: none;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            padding: 6px 14px;
+            background: rgba(15, 23, 42, 0.7);
+            display: inline-block;
+            margin-left: 10px;
+        }
+        .back-link:hover {
+            border-color: #38bdf8;
+        }
+        .export-btn {
+            font-size: 13px;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 999px;
+            border: 1px solid rgba(34, 197, 94, 0.7);
+            padding: 6px 14px;
+            background: rgba(34, 197, 94, 0.2);
+            display: inline-block;
+            margin-left: 10px;
+            transition: all 0.3s;
+        }
+        .export-btn:hover {
+            border-color: #22c55e;
+            background: rgba(34, 197, 94, 0.4);
+        }
+        .header {
+            margin-bottom: 28px;
+        }
+        .title-en {
+            font-size: 13px;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: #cbd5f5;
+            margin-bottom: 6px;
+        }
+        .title-cn {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        .chart-section {
+            background: rgba(15, 23, 42, 0.9);
+            border-radius: 18px;
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            padding: 32px;
+            -webkit-backdrop-filter: blur(18px);
+            backdrop-filter: blur(18px);
+            margin-bottom: 24px;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #f9fafb;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.3);
+            padding-bottom: 12px;
+        }
+        .chart-container {
+            margin-top: 20px;
+            position: relative;
+            height: 400px;
+        }
+        .chart-container-small {
+            height: 300px;
+        }
+        .analysis-text {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 12px;
+            border-left: 4px solid #38bdf8;
+            font-size: 14px;
+            line-height: 1.8;
+            color: #e5e7eb;
+        }
+        .analysis-text h4 {
+            color: #38bdf8;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+        .analysis-text ul {
+            margin-left: 20px;
+            margin-top: 8px;
+        }
+        .analysis-text li {
+            margin-bottom: 6px;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        @media (max-width: 1200px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+        .metric-card {
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .metric-label {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-bottom: 6px;
+        }
+        .metric-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #f9fafb;
+        }
+        .metric-description {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-top: 8px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+<div class="top-back">
+    <a href="{{ url_for('export_report_pdf', report_id=report.id) }}" class="export-btn">定制报告</a>
+    <a href="{{ url_for('report_detail', report_id=report.id) }}" class="back-link">返回详情</a>
+    <a href="{{ url_for('reports') }}" class="back-link">返回列表</a>
+</div>
+
+<div class="header">
+    <div class="title-en">VISUALIZATION ANALYSIS · DATA INSIGHTS</div>
+    <div class="title-cn">可视化分析</div>
+    <div style="font-size: 14px; color: #9ca3af; margin-top: 8px;">
+        报告：{{ report.original_filename }}
+    </div>
+</div>
+
+<div class="container">
+    {% if False %}
+    <div class="chart-section" style="background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.5);">
+        <div class="section-title">数据可用性检查</div>
+        <div style="font-size: 12px; color: #9ca3af; font-family: monospace;">
+            <p>particle_details: {{ custom_metrics.particle_details is defined }}</p>
+            <p>roundness_values: {{ custom_metrics.roundness_values is defined }}</p>
+            <p>aspect_ratio_values: {{ custom_metrics.aspect_ratio_values is defined }}</p>
+            <p>shape_distribution: {{ custom_metrics.shape_distribution is defined }}</p>
+            <p>edge_touching_count: {{ custom_metrics.edge_touching_count is defined }}</p>
+            <p>glcm_contrast_mean: {{ custom_metrics.glcm_contrast_mean is defined }}</p>
+            <p>lbp_entropy_mean: {{ custom_metrics.lbp_entropy_mean is defined }}</p>
+            <p>radial_std_mean: {{ custom_metrics.radial_std_mean is defined }}</p>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="chart-section">
+        <div class="section-title">关键指标概览</div>
+        <div class="grid-2">
+            {% if custom_metrics.coverage_rate %}
+            <div class="metric-card">
+                <div class="metric-label">粉末遮盖率</div>
+                <div class="metric-value">{{ "%.2f"|format(custom_metrics.coverage_rate * 100) }}%</div>
+                <div class="metric-description">颗粒覆盖图像总面积的比例，反映粉末密度</div>
+            </div>
+            {% endif %}
+            {% if custom_metrics.roundness_mean %}
+            <div class="metric-card">
+                <div class="metric-label">平均圆度</div>
+                <div class="metric-value">{{ "%.3f"|format(custom_metrics.roundness_mean) }}</div>
+                <div class="metric-description">值范围0-1，越接近1表示颗粒越接近圆形</div>
+            </div>
+            {% endif %}
+            {% if custom_metrics.aspect_ratio_mean %}
+            <div class="metric-card">
+                <div class="metric-label">平均长轴短轴比</div>
+                <div class="metric-value">{{ "%.3f"|format(custom_metrics.aspect_ratio_mean) }}</div>
+                <div class="metric-description">值越大表示颗粒越细长，1表示完美圆形</div>
+            </div>
+            {% endif %}
+            {% if custom_metrics.edge_touching_count is defined %}
+            <div class="metric-card">
+                <div class="metric-label">触碰边缘颗粒数</div>
+                <div class="metric-value">{{ custom_metrics.edge_touching_count }}</div>
+                <div class="metric-description">位于图像边缘的颗粒数量，可能影响分析准确性</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if custom_metrics.particle_details or (custom_metrics.roundness_values and custom_metrics.aspect_ratio_values) %}
+    <div class="chart-section">
+        <div class="section-title">形状分布多维分析</div>
+        <div class="chart-container">
+            <canvas id="shapeScatterChart"></canvas>
+        </div>
+        <div class="analysis-text">
+            <h4>分析说明</h4>
+            <p>散点图展示了每个颗粒在圆度-长轴短轴比二维空间中的分布：</p>
+            <ul>
+                <li><strong>X轴（长轴短轴比）</strong>：值越大表示颗粒越细长，1表示完美圆形</li>
+                <li><strong>Y轴（圆度）</strong>：值越接近1表示颗粒越接近圆形</li>
+                <li><strong>颜色区分</strong>：蓝色点表示Round（圆形）颗粒，红色点表示Irregular（不规则）颗粒</li>
+                <li><strong>理想区域</strong>：右上角区域（高圆度、低长轴短轴比）表示接近完美圆形的颗粒</li>
+            </ul>
+            <p style="margin-top: 12px;">
+                <strong>当前分布：</strong>圆形颗粒 {{ custom_metrics.shape_distribution.round }} 个（{{ "%.1f"|format((custom_metrics.shape_distribution.round / (custom_metrics.shape_distribution.round + custom_metrics.shape_distribution.irregular) * 100) if (custom_metrics.shape_distribution.round + custom_metrics.shape_distribution.irregular) > 0 else 0) }}%），
+                不规则颗粒 {{ custom_metrics.shape_distribution.irregular }} 个（{{ "%.1f"|format((custom_metrics.shape_distribution.irregular / (custom_metrics.shape_distribution.round + custom_metrics.shape_distribution.irregular) * 100) if (custom_metrics.shape_distribution.round + custom_metrics.shape_distribution.irregular) > 0 else 0) }}%）。
+                通过散点图可以直观地看到颗粒形状的分布模式和聚类特征。
+            </p>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if custom_metrics.edge_touching_count is defined and (custom_metrics.particle_details or (custom_metrics.roundness_values and custom_metrics.aspect_ratio_values)) %}
+    <div class="chart-section">
+        <div class="section-title">边缘触碰影响分析</div>
+        <div class="chart-container">
+            <canvas id="edgeComparisonChart"></canvas>
+        </div>
+        <div class="analysis-text">
+            <h4>分析说明</h4>
+            <p>对比图展示了触碰边缘与未触碰边缘颗粒在多个维度上的差异：</p>
+            <ul>
+                <li><strong>圆度对比</strong>：比较两类颗粒的平均圆度，评估边缘颗粒是否影响形状测量</li>
+                <li><strong>长轴短轴比对比</strong>：比较两类颗粒的平均椭圆度，评估边缘颗粒是否影响尺寸测量</li>
+                <li><strong>数量对比</strong>：显示两类颗粒的数量分布</li>
+            </ul>
+            <p style="margin-top: 12px;">
+                <strong>当前情况：</strong>
+                {% if custom_metrics.total_particles %}
+                共检测到 {{ custom_metrics.total_particles }} 个颗粒，其中 {{ custom_metrics.edge_touching_count }} 个（{{ "%.1f"|format((custom_metrics.edge_touching_count / custom_metrics.total_particles * 100) if custom_metrics.total_particles > 0 else 0) }}%）触碰边缘。
+                {% else %}
+                检测到 {{ custom_metrics.edge_touching_count }} 个颗粒触碰边缘。
+                {% endif %}
+                通过对比分析可以评估边缘颗粒对整体统计结果的影响程度。
+                {% if custom_metrics.edge_touching_count > 0 %}
+                如果两类颗粒的参数差异较大，建议在后续分析中考虑排除边缘颗粒。
+                {% else %}
+                所有颗粒均完整位于图像内部，分析结果可靠性较高。
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if custom_metrics.roundness_values %}
+    <div class="chart-section">
+        <div class="section-title">圆度分布分析</div>
+        <div class="chart-container">
+            <canvas id="roundnessChart"></canvas>
+        </div>
+        <div class="analysis-text">
+            <h4>分析说明</h4>
+            <p>莱利圆度（Riley Roundness）是衡量颗粒形状接近圆形程度的指标：</p>
+            <ul>
+                <li><strong>计算公式</strong>：圆度 = 4π × 面积 / 周长²</li>
+                <li><strong>取值范围</strong>：0 到 1，1 表示完美圆形</li>
+                <li><strong>分布特征</strong>：直方图展示了所有颗粒的圆度值分布情况</li>
+            </ul>
+            <p style="margin-top: 12px;">
+                <strong>当前分析：</strong>
+                平均圆度为 {{ "%.3f"|format(custom_metrics.roundness_mean) }}。
+                {% if custom_metrics.roundness_mean >= 0.7 %}
+                平均圆度较高，表明大部分颗粒形状接近圆形，颗粒质量较好。
+                {% elif custom_metrics.roundness_mean >= 0.5 %}
+                平均圆度中等，颗粒形状存在一定变化，部分颗粒可能为不规则形状。
+                {% else %}
+                平均圆度较低，颗粒形状不规则，可能存在破碎、变形或非球形颗粒。
+                {% endif %}
+                {% if custom_metrics.roundness_std %}
+                标准差为 {{ "%.3f"|format(custom_metrics.roundness_std) }}，反映了圆度值的离散程度。
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if custom_metrics.aspect_ratio_values %}
+    <div class="chart-section">
+        <div class="section-title">长轴短轴比分布分析</div>
+        <div class="chart-container">
+            <canvas id="aspectRatioChart"></canvas>
+        </div>
+        <div class="analysis-text">
+            <h4>分析说明</h4>
+            <p>长轴短轴比反映了颗粒的椭圆度或细长程度：</p>
+            <ul>
+                <li><strong>计算方法</strong>：通过拟合椭圆获得长轴和短轴长度，计算比值</li>
+                <li><strong>取值含义</strong>：1 表示圆形，值越大表示颗粒越细长</li>
+                <li><strong>应用场景</strong>：用于评估颗粒的形状均匀性和加工质量</li>
+            </ul>
+            <p style="margin-top: 12px;">
+                <strong>当前分析：</strong>
+                平均长轴短轴比为 {{ "%.3f"|format(custom_metrics.aspect_ratio_mean) }}。
+                {% if custom_metrics.aspect_ratio_mean <= 1.2 %}
+                比值接近1，表明颗粒形状接近圆形，形状均匀性较好。
+                {% elif custom_metrics.aspect_ratio_mean <= 1.5 %}
+                比值适中，颗粒存在一定椭圆度，但整体形状较为规则。
+                {% else %}
+                比值较大，颗粒较为细长，可能存在拉长或变形现象。
+                {% endif %}
+                {% if custom_metrics.aspect_ratio_std %}
+                标准差为 {{ "%.3f"|format(custom_metrics.aspect_ratio_std) }}，反映了形状一致性的变化程度。
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if custom_metrics.glcm_contrast_mean or custom_metrics.glcm_energy_mean or custom_metrics.glcm_homogeneity_mean %}
+    <div class="chart-section">
+        <div class="section-title">GLCM纹理特征分析</div>
+        <div class="chart-container">
+            <canvas id="glcmChart"></canvas>
+        </div>
+        <div class="analysis-text">
+            <h4>分析说明</h4>
+            <p>灰度共生矩阵（GLCM）特征用于描述颗粒表面的纹理特性：</p>
+            <ul>
+                <li><strong>对比度（Contrast）</strong>：{{ "%.3f"|format(custom_metrics.glcm_contrast_mean) if custom_metrics.glcm_contrast_mean else 'N/A' }} - 反映图像局部灰度变化的剧烈程度，值越大表示纹理越粗糙</li>
+                <li><strong>能量（Energy）</strong>：{{ "%.3f"|format(custom_metrics.glcm_energy_mean) if custom_metrics.glcm_energy_mean else 'N/A' }} - 反映图像灰度分布的均匀程度，值越大表示纹理越均匀</li>
+                <li><strong>同质性（Homogeneity）</strong>：{{ "%.3f"|format(custom_metrics.glcm_homogeneity_mean) if custom_metrics.glcm_homogeneity_mean else 'N/A' }} - 反映图像局部灰度分布的相似性，值越大表示纹理越平滑</li>
+            </ul>
+            <p style="margin-top: 12px;">
+                <strong>当前分析：</strong>
+                {% if custom_metrics.glcm_contrast_mean %}
+                对比度值 {{ "%.3f"|format(custom_metrics.glcm_contrast_mean) }} 表明颗粒表面纹理
+                {% if custom_metrics.glcm_contrast_mean > 200 %}
+                较为粗糙，可能存在明显的表面特征或缺陷。
+                {% elif custom_metrics.glcm_contrast_mean > 100 %}
+                中等粗糙度，表面存在一定的纹理变化。
+                {% else %}
+                较为平滑，表面纹理变化较小。
+                {% endif %}
+                {% endif %}
+                {% if custom_metrics.glcm_energy_mean %}
+                能量值 {{ "%.3f"|format(custom_metrics.glcm_energy_mean) }} 表明纹理分布
+                {% if custom_metrics.glcm_energy_mean > 0.1 %}
+                较为均匀。
+                {% else %}
+                存在一定的不均匀性。
+                {% endif %}
+                {% endif %}
+                {% if custom_metrics.glcm_homogeneity_mean %}
+                同质性值 {{ "%.3f"|format(custom_metrics.glcm_homogeneity_mean) }} 表明局部纹理
+                {% if custom_metrics.glcm_homogeneity_mean > 0.5 %}
+                相似性较高，表面较为一致。
+                {% else %}
+                相似性较低，表面存在变化。
+                {% endif %}
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    const customMetrics = {{ custom_metrics | tojson | safe }};
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                labels: {
+                    color: '#f9fafb',
+                    font: { size: 13 }
+                }
+            }
+        },
+        scales: {
+            x: {
+                ticks: { color: '#9ca3af' },
+                grid: { color: 'rgba(148, 163, 184, 0.2)' },
+                title: { color: '#9ca3af' }
+            },
+            y: {
+                ticks: { color: '#9ca3af' },
+                grid: { color: 'rgba(148, 163, 184, 0.2)' },
+                title: { color: '#9ca3af' }
+            }
+        }
+    };
+    
+    {% if custom_metrics.particle_details or (custom_metrics.roundness_values and custom_metrics.aspect_ratio_values) %}
+    const shapeScatterCtx = document.getElementById('shapeScatterChart');
+    if (shapeScatterCtx) {
+        let roundData = [];
+        let irregularData = [];
+        
+        {% if custom_metrics.particle_details %}
+        const particleDetails = {{ custom_metrics.particle_details | tojson | safe }};
+        particleDetails.forEach(particle => {
+            if (particle.roundness !== null && particle.aspect_ratio !== null) {
+                const point = {
+                    x: particle.aspect_ratio,
+                    y: particle.roundness
+                };
+                if (particle.shape === 'round') {
+                    roundData.push(point);
+                } else if (particle.shape === 'irregular') {
+                    irregularData.push(point);
+                }
+            }
+        });
+        {% else %}
+        {% if custom_metrics.roundness_values and custom_metrics.aspect_ratio_values %}
+        const roundnessValues = {{ custom_metrics.roundness_values | tojson | safe }};
+        const aspectRatioValues = {{ custom_metrics.aspect_ratio_values | tojson | safe }};
+        const minLength = Math.min(roundnessValues.length, aspectRatioValues.length);
+        for (let i = 0; i < minLength; i++) {
+            const point = {
+                x: aspectRatioValues[i],
+                y: roundnessValues[i]
+            };
+            if (roundnessValues[i] >= 0.7) {
+                roundData.push(point);
+            } else {
+                irregularData.push(point);
+            }
+        }
+        {% endif %}
+        {% endif %}
+        
+        new Chart(shapeScatterCtx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: 'Round (圆形)',
+                    data: roundData,
+                    backgroundColor: 'rgba(56, 189, 248, 0.6)',
+                    borderColor: 'rgba(56, 189, 248, 1)',
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }, {
+                    label: 'Irregular (不规则)',
+                    data: irregularData,
+                    backgroundColor: 'rgba(239, 68, 68, 0.6)',
+                    borderColor: 'rgba(239, 68, 68, 1)',
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                ...chartOptions,
+                plugins: {
+                    ...chartOptions.plugins,
+                    title: {
+                        display: true,
+                        text: '颗粒形状分布散点图',
+                        color: '#f9fafb',
+                        font: { size: 16 }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': 圆度=' + context.parsed.y.toFixed(3) + 
+                                       ', 长轴短轴比=' + context.parsed.x.toFixed(3);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ...chartOptions.scales.x,
+                        title: {
+                            display: true,
+                            text: '长轴短轴比（值越大越细长）',
+                            color: '#9ca3af',
+                            font: { size: 13 }
+                        },
+                        min: 0.8
+                    },
+                    y: {
+                        ...chartOptions.scales.y,
+                        title: {
+                            display: true,
+                            text: '圆度（值越接近1越圆）',
+                            color: '#9ca3af',
+                            font: { size: 13 }
+                        },
+                        min: 0,
+                        max: 1.1
+                    }
+                }
+            }
+        });
+    }
+    {% endif %}
+    
+    {% if custom_metrics.edge_touching_count is defined and (custom_metrics.particle_details or (custom_metrics.roundness_values and custom_metrics.aspect_ratio_values)) %}
+    const edgeComparisonCtx = document.getElementById('edgeComparisonChart');
+    if (edgeComparisonCtx) {
+        let touchingRoundness = [];
+        let touchingAspectRatio = [];
+        let notTouchingRoundness = [];
+        let notTouchingAspectRatio = [];
+        
+        {% if custom_metrics.particle_details %}
+        const particleDetails = {{ custom_metrics.particle_details | tojson | safe }};
+        particleDetails.forEach(particle => {
+            if (particle.edge_touching) {
+                if (particle.roundness !== null) touchingRoundness.push(particle.roundness);
+                if (particle.aspect_ratio !== null) touchingAspectRatio.push(particle.aspect_ratio);
+            } else {
+                if (particle.roundness !== null) notTouchingRoundness.push(particle.roundness);
+                if (particle.aspect_ratio !== null) notTouchingAspectRatio.push(particle.aspect_ratio);
+            }
+        });
+        {% else %}
+        {% if custom_metrics.roundness_values and custom_metrics.aspect_ratio_values %}
+        const roundnessValues = {{ custom_metrics.roundness_values | tojson | safe }};
+        const aspectRatioValues = {{ custom_metrics.aspect_ratio_values | tojson | safe }};
+        const localTouchingCount = {{ custom_metrics.edge_touching_count }};
+        const totalCount = roundnessValues.length;
+        
+        for (let i = 0; i < Math.min(localTouchingCount, roundnessValues.length); i++) {
+            touchingRoundness.push(roundnessValues[i]);
+            touchingAspectRatio.push(aspectRatioValues[i]);
+        }
+        for (let i = localTouchingCount; i < roundnessValues.length; i++) {
+            notTouchingRoundness.push(roundnessValues[i]);
+            notTouchingAspectRatio.push(aspectRatioValues[i]);
+        }
+        {% endif %}
+        {% endif %}
+        
+        const avgTouchingRoundness = touchingRoundness.length > 0 ? 
+            touchingRoundness.reduce((a, b) => a + b, 0) / touchingRoundness.length : 0;
+        const avgTouchingAspectRatio = touchingAspectRatio.length > 0 ? 
+            touchingAspectRatio.reduce((a, b) => a + b, 0) / touchingAspectRatio.length : 0;
+        const avgNotTouchingRoundness = notTouchingRoundness.length > 0 ? 
+            notTouchingRoundness.reduce((a, b) => a + b, 0) / notTouchingRoundness.length : 0;
+        const avgNotTouchingAspectRatio = notTouchingAspectRatio.length > 0 ? 
+            notTouchingAspectRatio.reduce((a, b) => a + b, 0) / notTouchingAspectRatio.length : 0;
+        
+        const touchingCount = {{ custom_metrics.edge_touching_count }};
+        {% if custom_metrics.total_particles %}
+        const totalParticles = {{ custom_metrics.total_particles }};
+        {% elif custom_metrics.particle_details %}
+        const totalParticles = particleDetails.length;
+        {% else %}
+        const totalParticles = touchingRoundness.length + notTouchingRoundness.length || touchingCount + 100;
+        {% endif %}
+        const notTouchingCount = Math.max(0, totalParticles - touchingCount);
+        
+        new Chart(edgeComparisonCtx, {
+            type: 'bar',
+            data: {
+                labels: ['平均圆度', '平均长轴短轴比', '数量占比 (%)'],
+                datasets: [
+                    {
+                        label: '触碰边缘',
+                        data: [
+                            avgTouchingRoundness * 100,
+                            avgTouchingAspectRatio * 30,
+                            (touchingCount / totalParticles) * 100
+                        ],
+                        backgroundColor: 'rgba(251, 191, 36, 0.8)',
+                        borderColor: 'rgba(251, 191, 36, 1)',
+                        borderWidth: 2
+                    },
+                    {
+                        label: '未触碰边缘',
+                        data: [
+                            avgNotTouchingRoundness * 100,
+                            avgNotTouchingAspectRatio * 30,
+                            (notTouchingCount / totalParticles) * 100
+                        ],
+                        backgroundColor: 'rgba(34, 197, 94, 0.8)',
+                        borderColor: 'rgba(34, 197, 94, 1)',
+                        borderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                ...chartOptions,
+                plugins: {
+                    ...chartOptions.plugins,
+                    title: {
+                        display: true,
+                        text: '边缘触碰颗粒多维度对比分析',
+                        color: '#f9fafb',
+                        font: { size: 16 }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            afterLabel: function(context) {
+                                const label = context.label;
+                                if (label === '平均圆度') {
+                                    return '原始值: 触碰=' + avgTouchingRoundness.toFixed(3) + 
+                                           ', 未触碰=' + avgNotTouchingRoundness.toFixed(3);
+                                } else if (label === '平均长轴短轴比') {
+                                    return '原始值: 触碰=' + avgTouchingAspectRatio.toFixed(3) + 
+                                           ', 未触碰=' + avgNotTouchingAspectRatio.toFixed(3);
+                                } else {
+                                    return '实际数量: 触碰=' + touchingCount + 
+                                           ', 未触碰=' + notTouchingCount;
+                                }
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        ...chartOptions.scales.y,
+                        title: {
+                            display: true,
+                            text: '归一化值',
+                            color: '#9ca3af'
+                        },
+                        beginAtZero: true
+                    },
+                    x: {
+                        ...chartOptions.scales.x,
+                        title: {
+                            display: true,
+                            text: '对比维度',
+                            color: '#9ca3af'
+                        }
+                    }
+                }
+            }
+        });
+    }
+    {% endif %}
+    
+    {% if custom_metrics.roundness_values %}
+    const roundnessCtx = document.getElementById('roundnessChart');
+    if (roundnessCtx) {
+        const roundnessData = {{ custom_metrics.roundness_values | tojson | safe }};
+        if (roundnessData && roundnessData.length > 0) {
+            const bins = 15;
+            const min = Math.min(...roundnessData);
+            const max = Math.max(...roundnessData);
+            const binWidth = (max - min) / bins;
+            const binCounts = new Array(bins).fill(0);
+            const binLabels = [];
+            
+            roundnessData.forEach(val => {
+                const binIndex = Math.min(Math.floor((val - min) / binWidth), bins - 1);
+                binCounts[binIndex]++;
+            });
+            
+            for (let i = 0; i < bins; i++) {
+                binLabels.push((min + i * binWidth).toFixed(2) + '-' + (min + (i + 1) * binWidth).toFixed(2));
+            }
+            
+            new Chart(roundnessCtx, {
+                type: 'bar',
+                data: {
+                    labels: binLabels,
+                    datasets: [{
+                        label: '颗粒数量',
+                        data: binCounts,
+                        backgroundColor: 'rgba(139, 92, 246, 0.6)',
+                        borderColor: 'rgba(139, 92, 246, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    ...chartOptions,
+                    plugins: {
+                        ...chartOptions.plugins,
+                        title: {
+                            display: true,
+                            text: '圆度分布（值越接近1越圆）',
+                            color: '#f9fafb',
+                            font: { size: 14 }
+                        }
+                    },
+                    scales: {
+                        ...chartOptions.scales,
+                        x: {
+                            ...chartOptions.scales.x,
+                            title: {
+                                display: true,
+                                text: '圆度值',
+                                color: '#9ca3af'
+                            },
+                            ticks: {
+                                ...chartOptions.scales.x.ticks,
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        },
+                        y: {
+                            ...chartOptions.scales.y,
+                            title: {
+                                display: true,
+                                text: '数量',
+                                color: '#9ca3af'
+                            },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    }
+    {% endif %}
+    
+    {% if custom_metrics.aspect_ratio_values %}
+    const aspectRatioCtx = document.getElementById('aspectRatioChart');
+    if (aspectRatioCtx) {
+        const aspectRatioData = {{ custom_metrics.aspect_ratio_values | tojson | safe }};
+        const bins = 15;
+        const min = Math.min(...aspectRatioData);
+        const max = Math.max(...aspectRatioData);
+        const binWidth = (max - min) / bins;
+        const binCounts = new Array(bins).fill(0);
+        const binLabels = [];
+        
+        aspectRatioData.forEach(val => {
+            const binIndex = Math.min(Math.floor((val - min) / binWidth), bins - 1);
+            binCounts[binIndex]++;
+        });
+        
+        for (let i = 0; i < bins; i++) {
+            binLabels.push((min + i * binWidth).toFixed(2) + '-' + (min + (i + 1) * binWidth).toFixed(2));
+        }
+        
+        new Chart(aspectRatioCtx, {
+            type: 'bar',
+            data: {
+                labels: binLabels,
+                datasets: [{
+                    label: '颗粒数量',
+                    data: binCounts,
+                    backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                ...chartOptions,
+                plugins: {
+                    ...chartOptions.plugins,
+                    title: {
+                        display: true,
+                        text: '长轴短轴比分布（值越大越细长）',
+                        color: '#f9fafb',
+                        font: { size: 14 }
+                    }
+                },
+                scales: {
+                    ...chartOptions.scales,
+                    x: {
+                        ...chartOptions.scales.x,
+                        title: {
+                            display: true,
+                            text: '长轴短轴比',
+                            color: '#9ca3af'
+                        },
+                        ticks: {
+                            ...chartOptions.scales.x.ticks,
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    },
+                    y: {
+                        ...chartOptions.scales.y,
+                        title: {
+                            display: true,
+                            text: '数量',
+                            color: '#9ca3af'
+                        },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+    {% endif %}
+    
+    {% if custom_metrics.glcm_contrast_mean or custom_metrics.glcm_energy_mean or custom_metrics.glcm_homogeneity_mean %}
+    const glcmCtx = document.getElementById('glcmChart');
+    if (glcmCtx) {
+        const glcmData = [];
+        const glcmLabels = [];
+        
+        {% if custom_metrics.glcm_contrast_mean %}
+        glcmData.push({{ custom_metrics.glcm_contrast_mean }});
+        glcmLabels.push('对比度');
+        {% endif %}
+        {% if custom_metrics.glcm_energy_mean %}
+        glcmData.push({{ custom_metrics.glcm_energy_mean }});
+        glcmLabels.push('能量');
+        {% endif %}
+        {% if custom_metrics.glcm_homogeneity_mean %}
+        glcmData.push({{ custom_metrics.glcm_homogeneity_mean }});
+        glcmLabels.push('同质性');
+        {% endif %}
+        
+        const maxValue = Math.max(...glcmData);
+        const normalizedData = glcmData.map(val => (val / maxValue) * 100);
+        
+        new Chart(glcmCtx, {
+            type: 'bar',
+            data: {
+                labels: glcmLabels,
+                datasets: [{
+                    label: '归一化值 (%)',
+                    data: normalizedData,
+                    backgroundColor: ['rgba(34, 197, 94, 0.6)', 'rgba(251, 191, 36, 0.6)', 'rgba(59, 130, 246, 0.6)'],
+                    borderColor: ['rgba(34, 197, 94, 1)', 'rgba(251, 191, 36, 1)', 'rgba(59, 130, 246, 1)'],
+                    borderWidth: 2
+                }, {
+                    label: '原始值',
+                    data: glcmData,
+                    type: 'line',
+                    borderColor: 'rgba(239, 68, 68, 1)',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    yAxisID: 'y1',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                ...chartOptions,
+                plugins: {
+                    ...chartOptions.plugins,
+                    title: {
+                        display: true,
+                        text: 'GLCM纹理特征对比',
+                        color: '#f9fafb',
+                        font: { size: 14 }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            afterLabel: function(context) {
+                                if (context.datasetIndex === 0) {
+                                    return '原始值: ' + glcmData[context.dataIndex].toFixed(3);
+                                }
+                                return '';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    ...chartOptions.scales,
+                    y: {
+                        ...chartOptions.scales.y,
+                        title: {
+                            display: true,
+                            text: '归一化值 (%)',
+                            color: '#9ca3af'
+                        },
+                        beginAtZero: true
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: '原始值',
+                            color: '#9ca3af'
+                        },
+                        ticks: { color: '#9ca3af' },
+                        grid: { drawOnChartArea: false }
+                    }
+                }
+            }
+        });
+    }
+    {% endif %}
+</script>
+</body>
+</html>
+

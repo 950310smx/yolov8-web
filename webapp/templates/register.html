@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>注册</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: stretch;
+            justify-content: center;
+            padding: 40px 40px;
+            background: linear-gradient(135deg, rgba(15,23,42,0.75), rgba(15,23,42,0.9)),
+                        url("{{ url_for('static', filename='img/bg-ai.png') }}") center/cover no-repeat fixed;
+        }
+        .shell {
+            width: 100%;
+            max-width: 1040px;
+            display: grid;
+            grid-template-columns: minmax(0, 3fr) minmax(0, 2.4fr);
+            gap: 28px;
+            align-items: stretch;
+        }
+        @media (max-width: 880px) {
+            .shell {
+                grid-template-columns: 1fr;
+            }
+        }
+        .side {
+            background: rgba(15, 23, 42, 0.9);
+            border-radius: 22px;
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            box-shadow: 0 26px 60px rgba(15, 23, 42, 0.9);
+            padding: 26px 26px 22px;
+            color: #e5e7eb;
+            backdrop-filter: blur(18px);
+        }
+        .side-title {
+            font-size: 22px;
+            font-weight: 650;
+            margin-bottom: 10px;
+        }
+        .side-sub {
+            font-size: 12px;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: #9ca3af;
+            margin-bottom: 18px;
+        }
+        .side-desc {
+            font-size: 13px;
+            line-height: 1.7;
+            color: #d1d5db;
+        }
+        .side-points {
+            margin-top: 16px;
+            font-size: 12px;
+            color: #9ca3af;
+            line-height: 1.6;
+        }
+        .container {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 18px;
+            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.35);
+            padding: 28px 28px 32px;
+            color: #111827;
+            border: 1px solid #e5e7eb;
+        }
+        .tabs {
+            display: flex;
+            background: #f9fafb;
+            border-radius: 999px;
+            padding: 4px;
+            margin-bottom: 24px;
+            border: 1px solid #e5e7eb;
+        }
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 8px 0;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 14px;
+            letter-spacing: 0.03em;
+            color: #6b7280;
+            transition: all 0.18s ease;
+            user-select: none;
+        }
+        .tab.active {
+            background: #111827;
+            color: #f9fafb;
+            box-shadow: 0 6px 14px rgba(15, 23, 42, 0.25);
+        }
+        .title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #111827;
+        }
+        .brand {
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+        .subtitle {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 14px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            margin-bottom: 6px;
+            color: #374151;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid #d1d5db;
+            background: #ffffff;
+            color: #111827;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+        }
+        .form-group input:focus {
+            border-color: #111827;
+            box-shadow: 0 0 0 1px rgba(17, 24, 39, 0.2);
+            background: #ffffff;
+        }
+        .form-group input::placeholder {
+            color: #9ca3af;
+        }
+        .actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            margin-top: 4px;
+        }
+        .actions a {
+            font-size: 12px;
+            color: #111827;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .actions a:hover {
+            text-decoration: underline;
+        }
+        .btn {
+            width: 100%;
+            padding: 10px 0;
+            border-radius: 999px;
+            border: 1px solid #111827;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            color: #ffffff;
+            background: #111827;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.25);
+            transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+            margin-top: 8px;
+        }
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 14px 32px rgba(15, 23, 42, 0.32);
+            filter: brightness(1.05);
+        }
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.25);
+            filter: brightness(0.98);
+        }
+        .flash {
+            margin-top: 12px;
+            font-size: 13px;
+            min-height: 18px;
+        }
+        .flash-success {
+            color: #4ade80;
+        }
+        .flash-error {
+            color: #fca5a5;
+        }
+        .hint {
+            margin-top: 16px;
+            font-size: 11px;
+            color: #6b7280;
+            border-top: 1px dashed rgba(75, 85, 99, 0.8);
+            padding-top: 10px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+<div class="shell">
+    <div class="side">
+        <div class="side-sub">METAL MICROSTRUCTURE AI CLOUD</div>
+        <div class="side-title">快速创建云端分析账号</div>
+        <div class="side-desc">
+            通过注册个人或团队账号，可以在平台中统一管理粉末与金属微观图像数据，
+            按任务维度跟踪分析进度与结果，并为后续报告中心、个人中心等模块打下基础。
+        </div>
+        <div class="side-points">
+            · 支持按账号区分个人数据与团队共享项目；<br>
+            · 结合数据库记录，可溯源每一次上传与分析；<br>
+            · 为说明文档中的“个人中心”“任务管理”等章节提供截图入口。
+        </div>
+    </div>
+
+    <div class="container">
+    <div class="tabs">
+        <a href="{{ url_for('login') }}" style="text-decoration:none;">
+            <div class="tab">登录</div>
+        </a>
+        <div class="tab active">注册</div>
+    </div>
+
+    <div class="brand">METAL MICROSTRUCTURE AI CLOUD</div>
+    <div class="title">金属材料微观图像智能分析云服务平台</div>
+    <div class="subtitle">注册账号，即可接入金属材料微观图像的在线识别与云端分析服务。</div>
+
+    <form method="post" action="{{ url_for('register') }}">
+        <div class="form-group">
+            <label for="username">用户名</label>
+            <input id="username" name="username" type="text" placeholder="请输入用户名">
+        </div>
+
+        <div class="form-group">
+            <label for="email">邮箱</label>
+            <input id="email" name="email" type="email" placeholder="请输入邮箱">
+        </div>
+
+        <div class="form-group">
+            <label for="password">密码</label>
+            <input id="password" name="password" type="password" placeholder="请输入密码">
+        </div>
+
+        <div class="actions">
+            <span style="font-size:12px;color:#6b7280;"></span>
+            <a href="{{ url_for('login') }}">已有账号？去登录</a>
+        </div>
+
+        <button class="btn" type="submit">注册</button>
+    </form>
+
+    <div class="flash">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    
+</div>
+</body>
+</html>
+
+

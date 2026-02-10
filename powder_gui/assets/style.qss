@@ -1,0 +1,236 @@
+QWidget {
+    background-color: #050608;
+    color: #e2e8f0;
+    font-family: "Orbitron", "Microsoft YaHei", sans-serif;
+    font-size: 13px;
+}
+
+QMainWindow {
+    background: #050608;
+}
+
+QWidget#bodyWrapper {
+    border: 1px solid rgba(41, 96, 121, 0.4);
+    border-radius: 24px;
+    background-color: rgba(4, 7, 15, 0.65);
+    padding: 12px;
+}
+
+QGroupBox {
+    border: 1px solid rgba(0, 255, 255, 0.25);
+    border-radius: 16px;
+    margin-top: 20px;
+    padding: 18px;
+    background: rgba(10, 13, 23, 0.85);
+    font-weight: 600;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 0 12px;
+    color: #64ffda;
+    font-size: 14px;
+    letter-spacing: 1px;
+}
+
+QGroupBox#bannerFrame {
+    border: 1px solid rgba(100, 255, 218, 0.3);
+    border-radius: 20px;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                                stop:0 rgba(5, 12, 30, 0.9),
+                                stop:1 rgba(7, 18, 46, 0.9));
+    margin-top: 0;
+}
+
+QGroupBox#bannerFrame::title {
+    padding: 0;
+}
+
+QLabel#bannerTitle {
+    font-size: 20px;
+    font-weight: 800;
+    color: #67e8f9;
+    letter-spacing: 2px;
+}
+
+QLabel#bannerSubtitle {
+    font-size: 13px;
+    color: #cbd5f5;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+}
+
+QGroupBox#controlPanel,
+QGroupBox#previewPanel,
+QGroupBox#metricsPanel,
+QGroupBox#historyPanel {
+    border: 1px solid rgba(100, 255, 218, 0.25);
+    background: rgba(4, 10, 22, 0.85);
+}
+
+QGroupBox#previewPanel {
+    border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+QGroupBox#metricsPanel {
+    border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+QGroupBox#historyPanel {
+    border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+QPushButton {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                                stop:0 rgba(8, 145, 178, 0.9),
+                                stop:0.5 rgba(14, 165, 233, 0.95),
+                                stop:1 rgba(56, 189, 248, 0.9));
+    border: 2px solid rgba(88, 213, 255, 0.6);
+    border-radius: 8px;
+    padding: 10px 20px;
+    color: #e0f7ff;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+QPushButton:hover {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                                stop:0 rgba(56, 189, 248, 0.95),
+                                stop:0.5 rgba(99, 234, 255, 1),
+                                stop:1 rgba(147, 250, 255, 0.95));
+    border-color: rgba(147, 250, 255, 0.9);
+    color: #0a1628;
+}
+
+QPushButton:pressed {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                                stop:0 rgba(6, 95, 120, 0.95),
+                                stop:1 rgba(8, 145, 178, 0.95));
+    border-color: rgba(56, 189, 248, 0.8);
+    padding-top: 12px;
+    padding-bottom: 8px;
+}
+
+QPushButton:disabled {
+    background: rgba(20, 30, 48, 0.8);
+    border-color: rgba(60, 80, 100, 0.4);
+    color: rgba(140, 160, 180, 0.5);
+}
+
+QPushButton#themeButton {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                                stop:0 rgba(168, 85, 247, 0.9),
+                                stop:1 rgba(236, 72, 153, 0.9));
+    border: 2px solid rgba(236, 72, 153, 0.6);
+    padding: 8px 16px;
+}
+
+QPushButton#themeButton:hover {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                                stop:0 rgba(192, 132, 252, 0.95),
+                                stop:1 rgba(244, 114, 182, 0.95));
+    border-color: rgba(244, 114, 182, 0.9);
+}
+
+QLineEdit, QListWidget, QTableWidget {
+    background-color: rgba(4, 7, 15, 0.9);
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    border-radius: 14px;
+    padding: 8px 12px;
+    selection-background-color: rgba(14, 165, 233, 0.6);
+}
+
+QListWidget::item {
+    padding: 6px;
+    border-radius: 10px;
+}
+
+QListWidget::item:selected {
+    background-color: rgba(8, 145, 178, 0.6);
+}
+
+QTableWidget {
+    gridline-color: rgba(148, 163, 184, 0.3);
+    border-radius: 16px;
+}
+
+QTableWidget#historyTable {
+    background-color: rgba(2, 8, 23, 0.9);
+    border: 1px solid rgba(248, 113, 113, 0.3);
+}
+
+QHeaderView::section {
+    background-color: rgba(8, 12, 20, 0.9);
+    color: #e2e8f0;
+    padding: 6px;
+    border: none;
+}
+
+QProgressBar {
+    background-color: rgba(6, 12, 24, 0.95);
+    border: 2px solid rgba(88, 213, 255, 0.4);
+    border-radius: 6px;
+    height: 28px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #e0f7ff;
+    letter-spacing: 1px;
+}
+
+QProgressBar::chunk {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                                stop:0 rgba(8, 145, 178, 0.95),
+                                stop:0.3 rgba(34, 211, 238, 1),
+                                stop:0.7 rgba(99, 234, 255, 1),
+                                stop:1 rgba(147, 250, 255, 0.9));
+    border-radius: 4px;
+    margin: 2px;
+}
+
+QLabel#success_label {
+    color: #bef264;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+QLabel#previewCanvas {
+    border: 1px solid rgba(248, 113, 113, 0.4);
+    background: rgba(4, 6, 18, 0.9);
+    border-radius: 18px;
+}
+
+QGroupBox#metricCard {
+    border: 1px solid rgba(34, 211, 238, 0.3);
+    border-radius: 14px;
+    background: rgba(2, 6, 23, 0.85);
+    margin-top: 0;
+    padding: 12px;
+}
+
+QLabel#metricTitle {
+    font-size: 12px;
+    color: #93c5fd;
+    letter-spacing: 1px;
+}
+
+QLabel#metricValue {
+    font-size: 22px;
+    font-weight: 800;
+    color: #f472b6;
+}
+
+QLabel#prefixLabel {
+    color: #a5b4fc;
+    font-weight: 600;
+    min-width: 48px;
+}
+
+
+
+
+

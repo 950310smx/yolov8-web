@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>主界面 - 金属材料微观图像智能分析云服务平台</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(135deg, rgba(15,23,42,0.8), rgba(15,23,42,0.95)),
+                        url("{{ url_for('static', filename='img/bg-ai.png') }}") center/cover no-repeat fixed;
+            color: #f9fafb;
+        }
+        .navbar {
+            width: 100%;
+            padding: 10px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(15, 23, 42, 0.82);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.5);
+            backdrop-filter: blur(14px);
+        }
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo-badge {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: radial-gradient(circle at 30% 20%, #e5f2ff, #38bdf8 40%, #0f172a 80%);
+            box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.5), 0 10px 25px rgba(15, 23, 42, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: #0f172a;
+        }
+        .nav-title-main {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .nav-title-sub {
+            font-size: 11px;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: #9ca3af;
+        }
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 13px;
+        }
+        .nav-link {
+            color: #e5e7eb;
+            text-decoration: none;
+            padding: 6px 2px;
+            border-bottom: 2px solid transparent;
+            transition: border-color 0.15s ease, color 0.15s ease;
+        }
+        .nav-link:hover {
+            color: #ffffff;
+            border-bottom-color: #38bdf8;
+        }
+        .nav-link-cta {
+            padding: 6px 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            background: rgba(15, 23, 42, 0.9);
+        }
+        .nav-link-cta:hover {
+            border-color: #38bdf8;
+            background: rgba(15, 23, 42, 1);
+        }
+        .main-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 32px 40px;
+        }
+        .hero-card {
+            width: 100%;
+            max-width: 1200px;
+            min-height: 72vh;
+            background: rgba(15, 23, 42, 0.9);
+            border-radius: 24px;
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            box-shadow: 0 30px 70px rgba(15, 23, 42, 0.95);
+            padding: 26px 34px 26px;
+            display: grid;
+            grid-template-columns: 2.1fr 1.1fr;
+            gap: 24px;
+            backdrop-filter: blur(18px);
+        }
+        @media (max-width: 880px) {
+            .hero-card {
+                grid-template-columns: 1fr;
+            }
+        }
+        .hero-left {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .hero-top {
+            margin-bottom: 32px;
+        }
+        .hero-title-cn {
+            font-size: 30px;
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+        .hero-title-en {
+            font-size: 13px;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: #cbd5f5;
+            margin-bottom: 18px;
+        }
+        .hero-desc {
+            font-size: 15px;
+            color: #e5e7eb;
+            line-height: 1.9;
+            margin-bottom: 26px;
+        }
+        .hero-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+        .tag {
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            font-size: 11px;
+            color: #e5e7eb;
+            background: rgba(15, 23, 42, 0.8);
+        }
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 22px;
+            margin-bottom: 4px;
+        }
+        .btn-primary {
+            padding: 18px 64px;
+            border-radius: 999px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            color: #0f172a;
+            background: #e5f2ff;
+            box-shadow: 0 16px 36px rgba(37, 99, 235, 0.8);
+            transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 18px 40px rgba(37, 99, 235, 0.9);
+            filter: brightness(1.03);
+        }
+        .btn-secondary {
+            padding: 18px 52px;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.8);
+            cursor: pointer;
+            font-size: 15px;
+            color: #e5e7eb;
+            background: rgba(15, 23, 42, 0.2);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-secondary:hover {
+            background: rgba(15, 23, 42, 0.5);
+        }
+        .hero-hint {
+            font-size: 11px;
+            color: #9ca3af;
+        }
+        .hero-right {
+            border-radius: 18px;
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            background: radial-gradient(circle at 10% 0%, rgba(148, 163, 184, 0.25), transparent 45%),
+                        radial-gradient(circle at 90% 0%, rgba(59, 130, 246, 0.4), transparent 55%),
+                        rgba(15, 23, 42, 0.96);
+            padding: 18px 18px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .right-placeholder-title {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 2px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #cbd5f5;
+        }
+        .right-placeholder-desc {
+            font-size: 11px;
+            color: #9ca3af;
+            line-height: 1.6;
+            max-width: 240px;
+        }
+        .chart-container {
+            position: relative;
+            width: 240px;
+            height: 240px;
+        }
+        .chart-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .chart-center-count {
+            font-size: 32px;
+            font-weight: 700;
+            color: #f8fafc;
+        }
+        .chart-center-label {
+            font-size: 12px;
+            color: #94a3b8;
+            letter-spacing: 0.2em;
+        }
+        .chart-stats {
+            display: flex;
+            gap: 18px;
+            font-size: 12px;
+            color: #e2e8f0;
+        }
+        .chart-stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            align-items: center;
+        }
+        .chart-stat-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        .chart-stat-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #f8fafc;
+        }
+        .chart-empty {
+            margin-top: 12px;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+        .footer {
+            padding: 8px 40px 16px;
+            font-size: 11px;
+            color: #9ca3af;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+<div class="navbar">
+    <div class="nav-left">
+        <div class="logo-badge">AI</div>
+        <div>
+            <div class="nav-title-main">金属材料微观图像智能分析云服务平台</div>
+            <div class="nav-title-sub">METAL MICROSTRUCTURE AI CLOUD PLATFORM</div>
+        </div>
+    </div>
+    <div class="nav-right">
+        {% if session.get('role') == 'admin' %}
+        <a href="{{ url_for('admin_dashboard') }}" class="nav-link">管理员</a>
+        {% endif %}
+        {% if session.get('role') == 'member' %}
+        <a href="{{ url_for('custom_analysis') }}" class="nav-link">定制化分析</a>
+        {% endif %}
+        <a href="{{ url_for('new_analysis') }}" class="nav-link">数据上传</a>
+        <a href="{{ url_for('reports') }}" class="nav-link">报告中心</a>
+        <a href="{{ url_for('profile') }}" class="nav-link">个人中心</a>
+        <a href="{{ url_for('logout') }}" class="nav-link nav-link-cta">账号 / 退出</a>
+    </div>
+</div>
+
+<div class="main-wrapper">
+    <div class="hero-card">
+        <div class="hero-left">
+            <div class="hero-top">
+                <div class="hero-title-en">METAL MICROSTRUCTURE INTELLIGENT ANALYSIS · CLOUD SERVICE</div>
+                <div class="hero-title-cn">金属材料微观图像智能分析云服务平台</div>
+                <p class="hero-desc">
+                    集成金属材料显微图像智能识别、组织分类、缺陷检测与指标统计等功能，支持本地图片一键上传，
+                    云端自动完成分析与结果管理，为材料研发、质量控制与失效分析提供高效、直观的一站式解决方案。
+                </p>
+            </div>
+            <div class="hero-actions">
+                <a href="{{ url_for('new_analysis') }}" class="btn-primary">
+                    立即上传微观图像
+                    <span>→</span>
+                </a>
+                <a href="{{ url_for('reports') }}" class="btn-secondary">
+                    查看历史分析记录
+                </a>
+            </div>
+            <div class="hero-hint">
+                
+            </div>
+        </div>
+
+        <div class="hero-right">
+            <div class="right-placeholder-title">MODEL OVERVIEW</div>
+            <div class="right-placeholder-desc">
+                当前检测数据中粉末 / 金属任务的占比分布。
+            </div>
+            <div class="chart-container">
+                <canvas id="materialDonut" data-stats='{{ donut_data | tojson | safe }}'></canvas>
+                <div class="chart-center">
+                    <div class="chart-center-count">{{ donut_data.total }}</div>
+                    <div class="chart-center-label">TOTAL</div>
+                </div>
+            </div>
+            <div class="chart-stats">
+                <div class="chart-stat-item">
+                    <div class="chart-stat-dot" style="background: #38bdf8;"></div>
+                    <div>粉末占比</div>
+                    <div class="chart-stat-value" id="powderPercent">0%</div>
+                </div>
+                <div class="chart-stat-item">
+                    <div class="chart-stat-dot" style="background: #f87171;"></div>
+                    <div>金属占比</div>
+                    <div class="chart-stat-value" id="metalPercent">0%</div>
+                </div>
+            </div>
+            {% if donut_data.total == 0 %}
+            <div class="chart-empty">暂无检测数据，完成任务后将自动更新。</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    const donutCanvas = document.getElementById('materialDonut');
+    const rawStats = donutCanvas.dataset.stats || '{"labels":["粉末","金属"],"values":[0,0],"total":0}';
+    let donutData;
+    try {
+        donutData = JSON.parse(rawStats);
+    } catch (err) {
+        donutData = { labels: ["粉末", "金属"], values: [0, 0], total: 0 };
+    }
+    const ctx = donutCanvas.getContext('2d');
+    const powder = donutData.values[0] || 0;
+    const metal = donutData.values[1] || 0;
+    const total = Math.max(donutData.total || 0, powder + metal);
+
+    document.getElementById('powderPercent').textContent = total ? (Math.round(powder / total * 100) + '%') : '0%';
+    document.getElementById('metalPercent').textContent = total ? (Math.round(metal / total * 100) + '%') : '0%';
+
+    const donutChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: donutData.labels,
+            datasets: [{
+                data: donutData.values,
+                backgroundColor: ['#38bdf8', '#f87171'],
+                borderWidth: 0,
+                hoverOffset: 8
+            }]
+        },
+        options: {
+            cutout: '62%',
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const value = context.parsed;
+                            const percent = total ? ((value / total) * 100).toFixed(1) : 0;
+                            return context.label + ': ' + value + ' (' + percent + '%)';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    donutCanvas.addEventListener('click', function(event) {
+        const elements = donutChart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, true);
+        if (!elements.length) return;
+        const index = elements[0].index;
+        const label = donutChart.data.labels[index];
+        if (label === '粉末' || label === '金属') {
+            const target = "{{ url_for('reports') }}?filter=" + encodeURIComponent(label);
+            window.location.href = target;
+        }
+    });
+</script>
+</body>
+</html>
+
+
