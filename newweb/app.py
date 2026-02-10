@@ -102,13 +102,13 @@ st.sidebar.header("⚙️ 推理与分析参数")
 # --- 模型配置和加载 ---
 st.sidebar.subheader("模型配置")
 
-# 这里直接使用你当前项目下 v10.3.1.pt 的绝对路径，等同于你在侧边栏里手动输入“方式二”
-default_weights_path = r"D:\subject\yolov8-main\yolov8-main\v10.3.1.pt"
+# 默认权重路径：相对于项目根目录的 v10.3.1.pt，既适用于本地，也适用于云端（/mount/src/...）。
+default_weights_path = os.path.join(PROJECT_ROOT, "v10.3.1.pt")
 
 weights_path_input = st.sidebar.text_input(
     "模型权重文件路径 (.pt 或 .onnx)",
     value=default_weights_path,
-    help="YOLOv8模型权重文件的绝对路径。",
+    help="YOLOv8 模型权重文件的路径（本地绝对路径，或仓库内的相对路径，如 v10.3.1.pt）。",
     key="ui_weights_path_input"
 )
 model = get_yolo_model(weights_path_input)
