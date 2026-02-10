@@ -11,7 +11,19 @@ import matplotlib.pyplot as plt
 import matplotlib
 import cv2
 from ultralytics import YOLO
-from skimage.feature import graycomatrix, graycoprops, local_binary_pattern
+
+# 尝试导入 scikit-image 的纹理特征模块；在不支持的环境（例如 Python 3.13 的 Streamlit Cloud）下，
+# 仅禁用依赖这些特征的高级分析功能，其它核心流程仍可正常运行。
+try:
+    from skimage.feature import graycomatrix, graycoprops, local_binary_pattern
+    SKIMAGE_AVAILABLE = True
+except ImportError:
+    SKIMAGE_AVAILABLE = False
+
+    def _skimage_missing(*_args, **_kwargs):
+        raise RuntimeError("当前运行环境未安装 scikit-image，无法计算灰度共生矩阵或 LBP 等纹理特征。")
+
+    graycomatrix = graycoprops = local_binary_pattern = _skimage_missing
 import scipy.stats
 import warnings
 from concurrent.futures import ThreadPoolExecutor, as_completed  # 用于并行计算
