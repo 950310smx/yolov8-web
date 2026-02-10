@@ -4,10 +4,16 @@ import numpy as np
 import cv2
 import os
 import io
+import sys
 import pandas as pd
 import math
 import warnings
 import matplotlib.pyplot as plt  # 导入 matplotlib.pyplot
+
+# 确保项目根目录在 Python 路径中，以便在云端环境下能找到本地的 ultralytics 包等顶层模块
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 
 # 忽略用户警告，避免 Streamlit 内部的一些提示信息干扰
 warnings.filterwarnings("ignore", category=UserWarning)
