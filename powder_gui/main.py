@@ -40,7 +40,7 @@ def main() -> None:
     app = QApplication(sys.argv)
     load_stylesheet(app)
     root_dir = Path(__file__).resolve().parents[1]
-    model_path = str(root_dir / "v10.3.1.pt")
+    model_path = str(root_dir / "1031.onnx")
     window = MainWindow(model_path=model_path)
     window.show()
     sys.exit(app.exec())

@@ -155,4 +155,4 @@ weights/
 *_paddle_model/
 
 # 显式跟踪当前项目需要的自定义模型权重
-!v10.3.1.pt
+!1031.onnx

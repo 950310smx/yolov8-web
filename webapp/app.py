@@ -79,12 +79,12 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(BASE_DIR)
 DB_PATH = os.path.join(BASE_DIR, "webapp.db")
 SCHEMA_PATH = os.path.join(BASE_DIR, "schema.sql")
-MODEL_PATH = os.path.join(PROJECT_ROOT, "v10.3.1.pt")
+MODEL_PATH = os.path.join(PROJECT_ROOT, "1031.onnx")
 
 app = Flask(__name__)
 app.secret_key = "change-this-secret-key"  # 用于 flash 消息，后续可改为环境变量
 
-# 预加载粉末检测模型（YOLOv8，自定义 v10.3.1.pt）
+# 预加载粉末检测模型（YOLOv8，自定义 1031.onnx）
 yolo_model = YOLO(MODEL_PATH)
 
 
